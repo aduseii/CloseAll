@@ -2,26 +2,22 @@
 
 Close every open window on Windows with one click or **Ctrl+Alt+Q**.
 
-It closes each window the way clicking **X** does. Anything still open after a second (for example an app asking "Save changes?") is **force-closed, and unsaved work in it is lost**. The taskbar, desktop and Windows' own background processes are never touched.
+Close All shows the windows that are open, lets you untick apps you want to keep, and closes the rest the way clicking **X** does. Apps that are still open after a short wait (for example ones asking "Save changes?") can be force-closed — unsaved work in them is lost. The taskbar, desktop and Windows' own processes are never touched. It keeps running in the system tray so **Ctrl+Alt+Q** works any time.
 
 ## Install
-1. Download **CloseAll-Setup.bat** (open it above, then click the download button), or download the whole repo as a ZIP.
-2. Double-click **CloseAll-Setup.bat**. If `CloseAll.ps1` isn't next to it, it downloads the latest one from here.
-3. Two shortcuts appear on your desktop:
-   - **Close All Windows** – closes everything. Hotkey **Ctrl+Alt+Q**.
-   - **Update Close All** – gets the latest version from this repo and installs it.
+Download **[CloseAll-Setup.bat](https://github.com/aduseii/CloseAll/raw/main/CloseAll-Setup.bat)** and double-click it. It downloads the latest `CloseAll.exe` from the releases, installs it to `%LOCALAPPDATA%\Programs\CloseAll` and starts it. Running it again updates an existing install.
 
-Right-click either one → Show more options → Pin to taskbar to keep it handy. If SmartScreen warns you, click **More info → Run anyway**.
+If SmartScreen warns you, click **More info → Run anyway**.
+
+## Updates
+Click **Check for updates** in the window, or in the tray icon's right-click menu. Close All also checks quietly each time it starts and changes the button to **Update to x.y.z** when a newer version is out. Updating downloads the new version, swaps it in and restarts — your settings stay.
 
 ## Settings
-Your settings live in `%LOCALAPPDATA%\CloseAll\settings.ps1`. Updates never overwrite it. Open it in Notepad to change:
-- `$KeepApps` – apps that should never be closed, e.g. `"spotify"`, `"discord"`
-- `$ForceClose` – `$false` brings back the "Save changes?" prompts
-- `$WaitSeconds` – how long apps get to close normally
-- `$HotKey` – the keyboard shortcut (`""` for none). Click **Update Close All** afterwards so the shortcut picks it up.
+Everything is in the window: which apps to keep, force-closing and the wait time, the hotkey, and starting with Windows. Settings are saved in `%APPDATA%\CloseAll\settings.txt`. Unexpected errors are logged to `%APPDATA%\CloseAll\error.log`.
 
-## Releasing an update
-Change `$Version` at the top of `CloseAll.ps1` (e.g. `1.1.0` → `1.2.0`) and push. **Update Close All** only installs versions newer than the one you have.
+Run `CloseAll.exe /closeall` to close everything without opening the window.
 
-## Uninstall
-Delete the two desktop shortcuts and the folder `%LOCALAPPDATA%\CloseAll`.
+## Releasing a new version
+1. Change `AssemblyVersion` and `AssemblyFileVersion` in `src/Program.cs`.
+2. Build with `./build.sh` (Mono) to get `build/CloseAll.exe`.
+3. Create a GitHub release tagged `vX.Y.Z` with `CloseAll.exe` attached. The update button picks up the newest release.
