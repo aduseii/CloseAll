@@ -9,8 +9,8 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("Close All")]
 [assembly: AssemblyDescription("Close every open window with one click")]
 // Bump this for every release. The update button compares it with the latest GitHub release.
-[assembly: AssemblyVersion("1.2.0.0")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyVersion("1.2.1.0")]
+[assembly: AssemblyFileVersion("1.2.1.0")]
 
 namespace CloseAllApp
 {

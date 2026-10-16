@@ -20,6 +20,9 @@ namespace CloseAllApp
         UpdateInfo pendingUpdate;
 
         ListView list;
+        TableLayoutPanel root, bottom;
+        FlowLayoutPanel header, options;
+        bool sized;
         ImageList icons;
         CheckBox chkForce, chkHotkey, chkStartup;
         NumericUpDown numWait;
@@ -46,17 +49,16 @@ namespace CloseAllApp
             try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch { }
             StartPosition = FormStartPosition.CenterScreen;
             ClientSize = new Size(560, 540);
-            MinimumSize = new Size(460, 440);
             BackColor = Color.White;
 
-            var root = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4, Padding = new Padding(16) };
+            root = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4, Padding = new Padding(16) };
             root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             root.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
             root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
             // Header
-            var header = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, AutoSize = true, Dock = DockStyle.Fill, WrapContents = false, Margin = new Padding(0, 0, 0, 8) };
+            header = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, AutoSize = true, Dock = DockStyle.Fill, WrapContents = false, Margin = new Padding(0, 0, 0, 8) };
             header.Controls.Add(new Label { Text = "Close All", Font = new Font("Segoe UI Semibold", 16f), AutoSize = true, Margin = new Padding(0) });
             header.Controls.Add(new Label { Text = "These windows will be closed. Untick any app you want to keep open.", ForeColor = Color.DimGray, AutoSize = true, Margin = new Padding(2, 2, 0, 0) });
             root.Controls.Add(header, 0, 0);
@@ -75,7 +77,7 @@ namespace CloseAllApp
             root.Controls.Add(list, 0, 1);
 
             // Options
-            var options = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, AutoSize = true, Dock = DockStyle.Fill, WrapContents = false, Margin = new Padding(0, 10, 0, 6) };
+            options = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, AutoSize = true, Dock = DockStyle.Fill, WrapContents = false, Margin = new Padding(0, 10, 0, 6) };
             var forceRow = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0) };
             chkForce = new CheckBox { Text = "Force-close apps still open after", AutoSize = true, Checked = settings.Force, Margin = new Padding(0, 4, 4, 0) };
             numWait = new NumericUpDown { Minimum = 0, Maximum = 30, DecimalPlaces = 1, Increment = 0.5m, Width = 56, Margin = new Padding(0, 2, 4, 0) };
@@ -105,7 +107,7 @@ namespace CloseAllApp
             btnUpdate.Click += (s, e) => { if (pendingUpdate != null) StartUpdate(pendingUpdate); else CheckForUpdates(true); };
 
             // Bottom bar
-            var bottom = new TableLayoutPanel { ColumnCount = 3, RowCount = 1, AutoSize = true, Dock = DockStyle.Fill, Margin = new Padding(0, 6, 0, 0) };
+            bottom = new TableLayoutPanel { ColumnCount = 3, RowCount = 1, AutoSize = true, Dock = DockStyle.Fill, Margin = new Padding(0, 6, 0, 0) };
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -170,6 +172,50 @@ namespace CloseAllApp
                 checkedOnce = true;
                 BeginInvoke((MethodInvoker)(() => CheckForUpdates(false)));
             }
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            FitToContent();
+        }
+
+        // Size the window so every control fits at the current display scaling
+        // (125%, 150%, ...), without the user having to drag it bigger.
+        void FitToContent()
+        {
+            if (sized || root == null) return;
+            sized = true;
+            try
+            {
+                float scale;
+                using (var g = CreateGraphics()) scale = Math.Max(1f, g.DpiX / 96f);
+
+                root.PerformLayout();
+                int width = 0, fixedHeight = 0;
+                foreach (Control c in new Control[] { header, options, bottom })
+                {
+                    Size pref = c.GetPreferredSize(new Size(int.MaxValue, int.MaxValue));
+                    width = Math.Max(width, pref.Width + c.Margin.Horizontal);
+                    fixedHeight += pref.Height + c.Margin.Vertical;
+                }
+                int pad = root.Padding.Vertical;
+                int minList = (int)(140 * scale), niceList = (int)(260 * scale);
+                width = Math.Max(width + root.Padding.Horizontal, (int)(520 * scale));
+
+                Rectangle area = Screen.FromControl(this).WorkingArea;
+                Size min = SizeFromClientSize(new Size(width, fixedHeight + pad + minList));
+                Size want = SizeFromClientSize(new Size(width, fixedHeight + pad + niceList));
+                min = new Size(Math.Min(min.Width, area.Width), Math.Min(min.Height, area.Height));
+                want = new Size(Math.Min(want.Width, area.Width), Math.Min(want.Height, area.Height));
+
+                MinimumSize = min;
+                Size = new Size(Math.Max(Width, want.Width), Math.Max(Height, want.Height));
+                if (Height > area.Height) Height = area.Height;
+                if (Width > area.Width) Width = area.Width;
+                Location = new Point(area.Left + (area.Width - Width) / 2, area.Top + (area.Height - Height) / 2);
+            }
+            catch { }
         }
 
         protected override void OnShown(EventArgs e)
