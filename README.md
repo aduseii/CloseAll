@@ -19,5 +19,5 @@ Run `CloseAll.exe /closeall` to close everything without opening the window.
 
 ## Releasing a new version
 1. Change `AssemblyVersion` and `AssemblyFileVersion` in `src/Program.cs`.
-2. Build with `./build.sh` (Mono) to get `build/CloseAll.exe`.
-3. Create a GitHub release tagged `vX.Y.Z` with `CloseAll.exe` attached. The update button picks up the newest release.
+2. (Optional) build locally with `./build.sh` (Mono) to check it compiles.
+3. Write what changed in `release-notes.md` and push. GitHub Actions builds `CloseAll.exe` and publishes the `vX.Y.Z` release; the update button picks it up.
